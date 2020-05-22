@@ -1,5 +1,66 @@
-For the framework
------------------
+Testing the engine
+------------------
+
+Pull requests submitted to the (engine repository)[https://github.com/flutter/engine]
+should be tested to prevent functional regressions. However, due to more
+diversity of environments in the engine repository, this guide is offered to
+describe how to write and run the various types of tests in the engine.
+
+## Android embedding
+
+If you're editing `.java` files in the https://github.com/flutter/engine/tree/master/shell/platform/android
+directory, you're working on the Android embedding which connects the core
+engine to the Android SDK APIs and runtime.
+
+### Robolectric JUnit tests
+
+For testing logic within a class at a unit level, create or add to a JUnit test.
+
+Existing Java unit tests are located at https://github.com/flutter/engine/tree/master/shell/platform/android/test
+and follow the Java package directory structure. Files in the `engine/shell/platform/android/io/flutter/` package tree can have a parallel file in the
+`engine/shell/platform/android/test/io/flutter/` package tree. Files in matching
+directories are considered [package visible](https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html)
+as is the case in standard Java.
+
+When editing production files in `engine/shell/platform/android/io/flutter/`,
+the easiest step to add tests is to look for a matching `...Test.java` file in
+`engine/shell/platform/android/test/io/flutter/`.
+
+The engine repo has a unified build system to build C, C++, Objective-C,
+Objective-C++, and Java files using [GN](https://gn.googlesource.com/gn/) and
+[Ninja](https://ninja-build.org/). Because it doesn't use the more common
+Gradle build system, the tests (and its dependencies) can't be directly built
+and run inside Android Studio like a standard Android project.
+
+However, the engine provides the script:
+
+    `testing/run_tests.py --type=java`
+
+to easily build and run the JUnit tests.
+
+See [[Setting-up-the-Engine-development-environment#using-vscode-as-an-ide-for-the-android-embedding-java]] for tips on setting up Java code completion and syntax
+highlighting in Visual Studio when working on the engine and tests.
+
+#### Robolectric
+
+[Robolectric](http://robolectric.org/) is a standard Android testing library to
+mock the Android runtime. It allows tests to be executed on a lightweight Java
+JVM without booting a heavy Android runtime in an emulator. This allows for
+rapid test iterations and allows our tests to run better on CI systems.
+
+All engine JUnit tests are Robolectric tests. Therefore all `android.*` imports
+are mocked by Robolectric. If you need to modify how Android components behave
+in the test, see other tests for examples or see docs at http://robolectric.org/
+on how to interact with shadows.
+
+#### Mockito
+
+[Mockito](https://site.mockito.org/) is also a standard Android testing library
+used to mock non-Android dependencies needed to construct your under-test
+production class.
+
+It's best practice to test only one real production class per test and
+mock all other dependencies with mockito.
 
 Dart tests are written using the `flutter_test` package's API,
 named with the suffix `_test.dart`, and placed inside the

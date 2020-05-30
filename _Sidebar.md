@@ -48,6 +48,7 @@ Flutter Wiki
 - [[Setting up the Engine development environment]]
 - [[Compiling the engine]]
 - [[Debugging the engine]]
+- [[Testing the engine]]
 - [[The Engine architecture]]
 - [[Flutter's modes]]
 - [[Engine disk footprint]]

@@ -1,15 +1,57 @@
 Testing the engine
 ------------------
 
-Pull requests submitted to the (engine repository)[https://github.com/flutter/engine]
+Pull requests submitted to the [engine repository](https://github.com/flutter/engine)
 should be tested to prevent functional regressions. However, due to more
 diversity of environments in the engine repository, this guide is offered to
 describe how to write and run the various types of tests in the engine.
 
-## Android embedding
+## C++ - core engine
+
+If you're editing `.cc` files in https://github.com/flutter/engine/tree/master,
+you're working on the core, portable Flutter engine.
+
+### Unit tests
+
+C++ unit tests are co-located with its header and source files. For instance,
+`fml/file.h` and `fml/file.cc` have a `fml/file_unittest.cc` as sibling. When
+editing C++ files, look for its `_unittest.cc` sibling or create one if not
+present.
+
+The engine repo has a unified build system to build C, C++, Objective-C,
+Objective-C++, and Java files using [GN](https://gn.googlesource.com/gn/) and
+[Ninja](https://ninja-build.org/). Individual `_unittest.cc` files are
+referenced by the `BUILD.gn` build rule located in the folder or in an ancestor
+folder.
+
+You can run the C++ unit tests with:
+
+    `testing/run_tests.py --type=engine`
+
+after building the engine variant to test (by default `host_debug_unopt`).
+
+Behind the scenes, those tests in the same directory are built together as a
+testonly executable when you build the engine variant. The `run_tests.py` script
+executes them one by one.
+
+C++ unit tests are executed during pre-submit on our CI system when submitting
+PRs to the `flutter/engine` repository.
+
+#### Google Tests
+
+C++ unit tests in the core engine uses the [Google Test](https://github.com/google/googletest/blob/master/googletest/docs/primer.md)
+C++ testing framework to facilitate C++ test discovery, assertions, etc.
+
+Since the engine is portable, these unit tests are compiled and run directly
+on and for your host machine architecture.
+
+It's best practice to test only one real production class per test and create
+mocks for all other dependencies.
+
+## Java - Android embedding
 
 If you're editing `.java` files in the https://github.com/flutter/engine/tree/master/shell/platform/android
-directory, you're working on the Android embedding which connects the core
+directory, you're working on the Android embedding which connects the core C++
 engine to the Android SDK APIs and runtime.
 
 ### Robolectric JUnit tests
@@ -17,29 +59,42 @@ engine to the Android SDK APIs and runtime.
 For testing logic within a class at a unit level, create or add to a JUnit test.
 
 Existing Java unit tests are located at https://github.com/flutter/engine/tree/master/shell/platform/android/test
-and follow the Java package directory structure. Files in the `engine/shell/platform/android/io/flutter/` package tree can have a parallel file in the
-`engine/shell/platform/android/test/io/flutter/` package tree. Files in matching
-directories are considered [package visible](https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html)
+and follow the Java package directory structure. Files in the `shell/platform/android/io/flutter/`
+package tree can have a parallel file in the `shell/platform/android/test/io/flutter/`
+package tree. Files in matching directories are considered [package visible](https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html)
 as is the case in standard Java.
 
-When editing production files in `engine/shell/platform/android/io/flutter/`,
+When editing production files in `shell/platform/android/io/flutter/`,
 the easiest step to add tests is to look for a matching `...Test.java` file in
-`engine/shell/platform/android/test/io/flutter/`.
+`shell/platform/android/test/io/flutter/`.
+
+See https://github.com/flutter/engine/blob/master/shell/platform/android/test/README.md
+for details.
 
 The engine repo has a unified build system to build C, C++, Objective-C,
 Objective-C++, and Java files using [GN](https://gn.googlesource.com/gn/) and
 [Ninja](https://ninja-build.org/). Because it doesn't use the more common
-Gradle build system, the tests (and its dependencies) can't be directly built
-and run inside Android Studio like a standard Android project.
+Gradle build system (which can't build C++ for instance), the tests and its
+dependencies can't be directly built and run inside Android Studio like a
+standard Android project.
 
-However, the engine provides the script:
+Instead, the engine provides the script:
 
     `testing/run_tests.py --type=java`
 
 to easily build and run the JUnit tests.
 
-See [[Setting-up-the-Engine-development-environment#using-vscode-as-an-ide-for-the-android-embedding-java]] for tips on setting up Java code completion and syntax
-highlighting in Visual Studio when working on the engine and tests.
+Behind the scenes, it invokes GN and Ninja to build a single .jar file
+containing the test runner and dependencies. Then it uses the system `java`
+runtime to execute the .jar. JDK v8 must be set as your `$JAVA_HOME` to run
+the Robolectric tests.
+
+See [[Setting-up-the-Engine-development-environment#using-vscode-as-an-ide-for-the-android-embedding-java]]
+for tips on setting up Java code completion and syntax highlighting in Visual
+Studio when working on the engine and tests.
+
+JUnit tests are executed during pre-submit on our CI system when submitting
+PRs to the `flutter/engine` repository.
 
 #### Robolectric
 
@@ -48,125 +103,200 @@ mock the Android runtime. It allows tests to be executed on a lightweight Java
 JVM without booting a heavy Android runtime in an emulator. This allows for
 rapid test iterations and allows our tests to run better on CI systems.
 
-All engine JUnit tests are Robolectric tests. Therefore all `android.*` imports
-are mocked by Robolectric. If you need to modify how Android components behave
-in the test, see other tests for examples or see docs at http://robolectric.org/
-on how to interact with shadows.
+All engine JUnit tests are Robolectric tests. This means all `android.*` imports
+are mocked by Robolectric. If you need to modify how Android components (such as
+an [android.view.View](https://developer.android.com/reference/android/view/View.html)
+or an [android.app.Activity](https://developer.android.com/reference/android/app/Activity.html))
+behave in the test, see other tests for examples or see docs at
+http://robolectric.org/ on how to interact with shadows.
 
 #### Mockito
 
 [Mockito](https://site.mockito.org/) is also a standard Android testing library
-used to mock non-Android dependencies needed to construct your under-test
-production class.
+used to mock non-Android dependencies needed to construct and test interactions
+with your your under-test production class.
 
 It's best practice to test only one real production class per test and
 mock all other dependencies with mockito.
 
-Dart tests are written using the `flutter_test` package's API,
-named with the suffix `_test.dart`, and placed inside the
-`test/` subdirectory of the package under test.
+The Mockito library is an available test dependency when writing Robolectric
+tests.
 
-We support several kinds of tests:
+### Component integration tests
 
-* Unit tests, e.g. using [`flutter_test`](https://master-docs-flutter-io.firebaseapp.com/flutter/flutter_test/flutter_test-library.html). See below.
+Component tests test the interaction of multiple embedding Java classes together
+but doesn't test all production classes end-to-end. In the Android embedding
+case, we test groups of Java classes by their function in `...ComponentTest.java`
+files that are also in the `shell/platform/android/test/io/flutter/`
+directory. C++ engine parts via JNI are not tested here.
 
-* Unit tests that use golden-file testing, comparing pixels.
-  See [[Writing a golden-file test for package:flutter]].
+Component tests are also Robolectric JUnit tests and are invoked together with
+unit tests when running:
 
-* End-to-end tests, e.g. using [`flutter_driver`](https://master-docs-flutter-io.firebaseapp.com/flutter/flutter_driver/flutter_driver-library.html) and our [device lab](https://github.com/flutter/flutter/blob/master/dev/devicelab/README.md).
+    `testing/run_tests.py --type=java`
 
-Our bots run on our [test and build infrastructure](https://github.com/flutter/flutter/blob/master/dev/bots/README.md).
+JUnit component tests are executed during pre-submit on our CI system when
+submitting PRs to the `flutter/engine` repository.
 
-## Running unit tests
+### End-to-end tests
 
-Flutter tests use the `flutter_test` package ([source](https://github.com/flutter/flutter/tree/master/packages/flutter_test), [API documentation](https://master-docs-flutter-io.firebaseapp.com/flutter/flutter_test/flutter_test-library.html)),
-which provides flutter-specific extensions on top of the [Dart `test` package](https://pub.dartlang.org/packages/test).
+End-to-end tests exercise the entire Android embedding with the C++ engine on
+a real Android runtime in an emulator. It's an integration test ensuring that
+the engine as a whole on Android is functioning correctly.
 
-To automatically find all files named `*_test.dart` inside a package's `test/` subdirectory, and
-run them inside the headless flutter shell as a test, use the `flutter test` command, e.g:
+The project containing the Android end-to-end engine test is at
+https://github.com/flutter/engine/tree/master/testing/scenario_app/android.
 
- * `cd examples/flutter_gallery`
- * `flutter test`
+This test project is build similarly to a normal Flutter app. With the Dart code
+compiled into AOT and the Android part compiled via Gradle with a dependency
+on the prebuilt local engine. It's then installed and executed on an emulator.
 
-Individual tests can also be run directly, e.g.: `flutter test lib/my_app_test.dart`
+Unlike a normal Flutter app, the Flutter framework on the Dart side is a
+lightweight fake at https://github.com/flutter/engine/tree/master/testing/scenario_app/lib
+that implements some of the basic functionalities of `dart:ui` Window rather
+than using the real Flutter framework at `flutter/flutter`.
 
-You can view these tests on a device by running them directly using `flutter run`.
-For tests inside the `packages/flutter` directory, you will need to copy them to
-(or symlink to them from) the `test/` directory of an actual app (e.g. the flutter
-gallery), since the `flutter` package itself is not set up to execute as an
-application (which is necessary to use `flutter run` with a test).
+The end-to-end test can be executed by running:
 
-Unit tests run with `flutter test` run inside a headless flutter shell on your workstation,
-you won't see any UI. You can use `print` to generate console output or you can interact
-with the Dart VM via the Dart Observatory at [http://localhost:8181/](http://localhost:8181/).
+    `testing/scenario_app/build_and_run_android_tests.sh`
 
-To debug tests in Observatory, use the `--start-paused` option to start the test in a
-paused state and wait for connection from a debugger. This option lets you set breakpoints
-before the test runs.
+Additional end-to-end instrumented tests can be added to https://github.com/flutter/engine/tree/master/testing/scenario_app/android/app/src/androidTest/java/dev/flutter/scenarios.
 
-To run analysis and all the tests for the entire Flutter repository, the same way that Cirrus
-runs them, run `dart dev/bots/test.dart` and `dart dev/bots/analyze.dart`.
+If supporting logic are needed for the test case, they can be added to the
+Android app under-test in https://github.com/flutter/engine/tree/master/testing/scenario_app/android/app/src/main/java/dev/flutter/scenarios
+or to the fake Flutter framework under-test in https://github.com/flutter/engine/tree/master/testing/scenario_app/lib.
 
-If you've built your own flutter engine (see [[Setting up the Engine development environment]]), you
-can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
-if you built an engine in the `out/host_debug_unopt` directory, you can pass
-`--local-engine=host_debug_unopt` to run the tests in that engine.
+As best practice, favor adding unit tests if possible since instrumented tests
+are, by nature, non-hermetic, slow and flaky.
 
-To learn how to see how well tested the codebase is, see [[Test coverage for package:flutter]].
+End-to-end tests on Android are currently not running on CI [#55326](https://github.com/flutter/flutter/issues/55326)
 
-## Running device lab tests locally
+## Objective-C - iOS embedding
 
-Flutter runs a number of end-to-end tests in a device lab. The Flutter repo contains code for bootstrapping and executing these tests, in addition to the tests themselves.
+If you're editing `.h` or `.mm` files in the https://github.com/flutter/engine/tree/master/shell/platform/darwin/ios
+directory, you're working on the iOS embedding which connects the core C++
+engine to the iOS SDK APIs and runtime.
 
-The code that runs the device lab end-to-end tests can be found here:
+### XCTest unit tests
 
-```
-dev/devicelab
-```
+For testing logic within a class at a unit level, create or add to a XCTestCase
+in the XCTest project.
 
-The tests that run in the device lab can be found here:
+The iOS unit testing infrastructure is split in 2 different locations. The
+`...Test.mm` files in https://github.com/flutter/engine/tree/master/shell/platform/darwin/ios
+contain the unit tests themselves. The
+https://github.com/flutter/engine/tree/master/testing/ios/IosUnitTests directory
+contains an Xcode container project to execute the test.
 
-```
-dev/integration_tests
-```
+See https://github.com/flutter/engine/blob/master/testing/ios/IosUnitTests/README.md
+for details on adding new test files.
 
-When a device lab test fails, it is important to be able to run the test locally to verify the problem and intended solution. To execute a device lab test locally, do the following:
+The engine repo has a unified build system to build C, C++, Objective-C,
+Objective-C++, and Java files using [GN](https://gn.googlesource.com/gn/) and
+[Ninja](https://ninja-build.org/). Since GN and Ninja has to build the C++
+dependencies that the Objective-C classes reference, the tests aren't built by
+the Xcode project in https://github.com/flutter/engine/tree/master/testing/ios/IosUnitTests.
 
-1. Navigate in your terminal to the `dev/devicelab` directory.
-1. Ensure that a physical device, simulator, or emulator is connected.
-1. Ensure that the current locale is en_US by executing the command: `export LANG=en_US.UTF-8`.
-1. Execute the command: `../../bin/cache/dart-sdk/bin/dart bin/run.dart -t [name_of_test]` where `[name_of_test]` is replaced by the name of the test you want to run as defined within `dev/devicelab/manifest.yaml`.
+Instead, the engine provides the script:
 
-### Device lab tests with a local engine
+    `testing/ios/run_tests.py --type=objc`
 
-Sometimes a device lab test fails due to engine changes that you've made. In these cases, you'd like to run the impacted device lab tests locally with your local version of the engine. To do this, pass the appropriate flags to `run.dart`:
+to easily build and run the XCTests.
 
-```
-../../bin/cache/dart-sdk/bin/dart bin/run.dart \
-  --local-engine-src-path=[path_to_src] \
-  --local-engine=[engine_build_for_your_device] \
-  -t [name_of_test]
-```
+Behind the scenes, it invokes GN and Ninja to build the tests and dependencies
+into a single `.dylib`. Then it uses Xcode and the Xcode project at
+`testing/ios/IosUnitTests` to import and execute the XCTests in the `.dylib`.
 
-If your local Flutter engine is in the same directory as your `flutter/` directory then you can omit the `--local-engine-src-path` parameter because it will be resolved automatically:
+See [[Setting-up-the-Engine-development-environment#editor-autocomplete-support]]
+for tips on setting up C/C++/Objective-C code completion and syntax highlighting
+when working on the engine and tests.
 
-```
-../../bin/cache/dart-sdk/bin/dart bin/run.dart \
-  --local-engine=[engine_build_for_your_device] \
-  -t [name_of_test]
-```
+XCTests are executed during pre-submit on our CI system when submitting PRs to
+the `flutter/engine` repository.
 
-The following is an example of what running the local engine command might look like:
+#### XCTest
 
-```
-../../bin/cache/dart-sdk/bin/dart bin/run.dart \
-  --local-engine-src-path=/Users/myname/flutter/engine/src \
-  --local-engine=android_debug_unopt_x86 \
-  -t external_ui_integration_test
-```
+[XCTest](https://developer.apple.com/documentation/xctest) is the standard way
+of creating unit tests in Xcode projects. Since iOS has x86 simulators and
+since we can build x86 engines, we can execute the XCTests directly on macOS
+in a headless simulator using the real iOS SDK.
 
-The above command would use the local Flutter engine located at `/Users/myname/flutter/engine` to execute the `external_ui_integration_test` test on an Android emulator, which is why the `android_debug_unopt_x86` version of the engine is used.
+#### OCMock
 
-For the engine
---------------
-See the [[Testing the engine]] wiki.
+[OCMock](https://ocmock.org) is a standard iOS testing library used to mock
+dependencies needed to construct and test interactions with your under-test
+production class.
+
+It's best practice to test only one real production class per test and
+mock all other dependencies with OCMock.
+
+The OCMock library is an available test dependency when writing XCTests.
+
+### End-to-end tests
+
+End-to-end tests exercise the entire iOS embedding with the C++ engine on
+a headless iOS simulator. It's an integration test ensuring that
+the engine as a whole on iOS is functioning correctly.
+
+The project containing the iOS end-to-end engine test is at
+https://github.com/flutter/engine/tree/master/testing/scenario_app/ios.
+
+This test project is build similarly to a normal debug Flutter app. With the
+Dart code bundled in JIT mode and the iOS part brought into Xcode with a
+`.framework` dependency on the prebuilt local engine. It's then installed and
+executed on a simulator via Xcode.
+
+Unlike a normal Flutter app, the Flutter framework on the Dart side is a
+lightweight fake at https://github.com/flutter/engine/tree/master/testing/scenario_app/lib
+that implements some of the basic functionalities of `dart:ui` Window rather
+than using the real Flutter framework at `flutter/flutter`.
+
+The end-to-end test can be executed by running:
+
+    `testing/scenario_app/build_and_run_ios_tests.sh`
+
+Additional end-to-end instrumented tests can be added to https://github.com/flutter/engine/tree/master/testing/scenario_app/ios/Scenarios/ScenariosTests.
+
+If supporting logic are needed for the test case, they can be added to the
+Android app under-test in https://github.com/flutter/engine/tree/master/testing/scenario_app/ios/Scenarios/Scenarios
+or to the fake Flutter framework under-test in https://github.com/flutter/engine/tree/master/testing/scenario_app/lib.
+
+As best practice, favor adding unit tests if possible since end-to-end tests
+are, by nature, non-hermetic, slow and flaky.
+
+End-to-end tests on iOS are executed during pre-submit on our CI system when
+submitting PRs to the `flutter/engine` repository.
+
+## Dart - dart:ui
+
+If you're editing `.dart` files in https://github.com/flutter/engine/tree/master/lib/ui,
+you're working on the 'dart:ui' package which is the interface between
+the C++ engine and the Dart Flutter framework.
+
+### Unit tests
+
+Dart classes in https://github.com/flutter/engine/tree/master/lib/ui have matching
+unit tests at https://github.com/flutter/engine/tree/master/testing/dart.
+
+When editing production files in the 'dart:ui' package, add to or create a
+test file in `testing/dart`.
+
+To run the Dart unit tests, use the script:
+
+   `testing/run_tests.py --type=dart`
+
+Behind the scenes, it invokes the engine repo's unified [GN](https://gn.googlesource.com/gn/)
+and [Ninja](https://ninja-build.org/) build systems to use a version of the Dart
+SDK specified in the `DEPS` file to create a `sky_engine` Dart package. Then it
+compiles and runs each `_test.dart` file under `testing/dart`.
+
+Dart unit tests are executed during pre-submit on our CI system when submitting
+PRs to the `flutter/engine` repository.
+
+### Framework tests
+
+Dart tests in the `flutter/flutter` framework repo are also executed on top of
+the `dart:ui` package and underlying engine.
+
+These tests are executed during pre-submit on our CI system when
+submitting PRs to the `flutter/engine` repository.

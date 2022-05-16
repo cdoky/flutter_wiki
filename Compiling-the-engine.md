@@ -167,7 +167,7 @@ Run the following steps, from the `src` directory created in the steps above:
 
 2. `gclient sync` to update dependencies.
 
-3. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator, and if working on iPhone 4s or older, `--ios --ios-cpu=arm --unoptimized`).
+3. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator).
   * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt`
   * For a discussion on the various flags and modes, see [[Flutter's modes]].
   * Add the `--xcode-symlinks` argument when using goma.
@@ -175,7 +175,7 @@ Run the following steps, from the `src` directory created in the steps above:
 4. `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
   * Add the `--xcode-symlinks` argument when using goma.
 
-5. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator, `out/out/ios_debug_unopt_arm` for iPhone 4s or older).
+5. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
     * For Googlers, consider also using the `--goma` flag with gn, then building with `autoninja` to parallelize the build using Goma.
 
 See [[The flutter tool]] for instructions on how to use the `flutter` tool with a local engine.

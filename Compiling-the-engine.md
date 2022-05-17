@@ -310,7 +310,7 @@ $ENGINE_DIR/flutter/tools/gn --fuchsia --no-lto
 5. Build a Fuchsia binary:
 
 ```sh
-ninja -C $ENGINE_DIR/out/fuchsia_debug_x64
+ninja -C $ENGINE_DIR/out/fuchsia_debug_x64 flutter/shell/platform/fuchsia
 ``` 
 
   * If you used `--unoptimized`, use `ninja -C out/fuchsia_debug_unopt_x64` instead.

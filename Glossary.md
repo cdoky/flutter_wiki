@@ -24,6 +24,8 @@ Here are some terms that we use in the Flutter project and what they mean:
 
 - **Modular application delivery**. The ability to package a single app into multiple separate archives when compiling it, and download them independently as needed.
 
+- **NTE**. "Needs Test Exemption". Indicates that a PR does not need tests, typically because the PR is refactoring code without changing the semantics of the code, or because it actually does have tests but the automated systems didn't recognize them. A test exemption consists of a comment on the PR that has a line that starts with the string `test-exempt: ` followed by an explanation of why. Currently only repo admins may grant test exemptions. A bot will add a comment to a PR if a test exemption is required.
+
 - **Skia**. The graphics library used by Flutter.
 
 - **Tool**. The `flutter` program (started from `bin/flutter` on Unix systems, `bin/linux.bat` on Windows) that developers use to drive their work when using Flutter.

@@ -2,6 +2,10 @@ This page covers additional information that is specific to contributing to flut
 
 ## Version and CHANGELOG updates
 
+Most changes need version and CHANGELOG changes; see below for details.
+
+In most cases, the easiest way to create them is to use [the `update-release-info` repository command](https://github.com/flutter/plugins/blob/main/script/tool/README.md#update-changelog-and-version). If you are adding a feature, use `--version=minor`, otherwise `--version=minimal` will almost always do the right thing.
+
 ### Version
 
 Any change that needs to be published in order to take effect must update the version in `pubspec.yaml`. There are very few exceptions:
@@ -25,33 +29,6 @@ All version changes must have an accompanying CHANGELOG update. Even version-exe
 ```
 
 This policy exists both to make it easier for maintainers to see a record of all changes to a package, and because some changes (e.g., updates to examples) that do not need to be published may still be of interest to clients of a package.
-
-#### Updating a CHANGELOG that has a `NEXT`
-
-If you are adding a version change to a CHANGELOG that starts with `NEXT`, and your change also doesn't require a version update, just add a description to the existing `NEXT` list:
-```
-## NEXT
-
-* Description of your new change.
-* Existing entry.
-
-## 1.0.2
-...
-```
-
-If your change does require a version change, do the same, but then replace `NEXT` with the new version. For example:
-
-```
-## 1.0.3
-
-* Description of your new change.
-* Existing entry.
-
-## 1.0.2
-...
-```
-
-If you leave `NEXT` when adding a version change, automated tests for your PR will fail.
 
 #### CHANGELOG style
 
@@ -78,6 +55,35 @@ Example:
 
 * Fixes a crash when the device teleports during a network operation.
 ```
+
+#### Updating a CHANGELOG that has a `NEXT`
+
+*Note: If you are using `update-release-info`, this will be handled correctly for you.*
+
+If you are adding a version change to a CHANGELOG that starts with `NEXT`, and your change also doesn't require a version update, just add a description to the existing `NEXT` list:
+```
+## NEXT
+
+* Description of your new change.
+* Existing entry.
+
+## 1.0.2
+...
+```
+
+If your change does require a version change, do the same, but then replace `NEXT` with the new version. For example:
+
+```
+## 1.0.3
+
+* Description of your new change.
+* Existing entry.
+
+## 1.0.2
+...
+```
+
+If you leave `NEXT` when adding a version change, automated tests for your PR will fail.
 
 ### FAQ
 

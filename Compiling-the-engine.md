@@ -76,17 +76,11 @@ Depending on the platform you are making changes for, you may be interested in a
     export GOMA_SERVER_PORT=443
     ```
 
-## Using a pre-built Dart SDK
-
-When targeting the host and desktop, on CI we use a pre-built Dart SDK vended by the Dart team.
-To use the same setup locally, define the environment variable `FLUTTER_PREBUILT_DART_SDK=1`,
-do a `gclient sync`, and pass the flag `--prebuilt-dart-sdk` to `//flutter/tools/gn`.
-
 ## Using a custom Dart SDK
 
-`gclient sync` downloads the Dart SDK sources in `engine/src/third_party/dart`. Files in this
-directory can be edited. To ensure those changes are visible, pass the flag `--no-prebuilt-dart-sdk`
-to `//flutter/tools/gn`.
+When targeting the host and desktop, on CI we use a pre-built Dart SDK vended by the Dart team.
+To build and use the SDK from the Dart sources downloaded by `gclient sync`, after editing those
+source files, pass the flag `--no-prebuilt-dart-sdk` to `//flutter/tools/gn`.
 
 ## Compiling for Android (from macOS or Linux)
 

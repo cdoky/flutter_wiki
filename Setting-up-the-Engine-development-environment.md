@@ -18,8 +18,7 @@ Make sure you have the following dependencies available:
  * On macOS and Linux: curl and unzip (used by `gclient sync`).
  * On Windows:
    - Visual Studio 2017 or later (required for non-Googlers only).
-   - [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/) (required for non-Googlers only).
-     - Be sure to install the "Debugging Tools for Windows" feature.
+   - [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/) (required for non-Googlers only). Be sure to install the "Debugging Tools for Windows" feature.
  * On macOS: the latest Xcode.
  * Recommended for Googlers: Goma for distributed builds. The [compiling page](https://github.com/flutter/flutter/wiki/Compiling-the-engine) has more information on how to set this up.
 
@@ -36,6 +35,9 @@ Run the following steps to set up your environment:
    will take care of that for you.
 1. If you haven't configured your machine with an SSH key that's known to github then
    follow the directions here: https://help.github.com/articles/generating-ssh-keys/.
+1. Non-Googler Windows users should set the following environment variables to point `depot_tools` to their Visual Studio installation directory:
+   * `DEPOT_TOOLS_WIN_TOOLCHAIN=0`
+   * `GYP_MSVS_OVERRIDE_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community` (use the path of your installation)
 1. Create an empty directory called `engine` for your copy of the repository and
    `cd` into it. (It is possible to use a different name, but some tools assume this
    name unless configured otherwise, so calling it `engine` will make thing easier.)

@@ -11,6 +11,9 @@ $ flutter channel stable
 $ flutter upgrade
 ```
 ## Flutter 3.0 Changes
+### [3.0.1](https://github.com/flutter/flutter/releases/tag/3.0.1) (May 19, 2022)
+This hotfix release addresses the following issues:
+ * [flutter/102947](https://github.com/flutter/flutter/issues/102947) - Radial gradients behave incorrectly when painting text.
 ### [3.0.0](https://github.com/flutter/flutter/releases/tag/3.0.0) (May 11, 2022)
 Initial stable release.
 ## Flutter 2.10 Changes

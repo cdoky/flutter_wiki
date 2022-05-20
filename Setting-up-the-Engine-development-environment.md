@@ -18,7 +18,7 @@ Make sure you have the following dependencies available:
  * On macOS and Linux: curl and unzip (used by `gclient sync`).
  * On Windows:
    - Visual Studio 2017 or later (required for non-Googlers only).
-   - Windows 10 SDK (required for non-Googlers only).
+   - [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/) (required for non-Googlers only).
      - Be sure to install the "Debugging Tools for Windows" feature.
  * On macOS: the latest Xcode.
  * Recommended for Googlers: Goma for distributed builds. The [compiling page](https://github.com/flutter/flutter/wiki/Compiling-the-engine) has more information on how to set this up.

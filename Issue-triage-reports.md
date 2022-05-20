@@ -1,5 +1,72 @@
 This page contains weekly issue triage reports from the Nevercode front-line triage team.
 
+## 2022-05-20
+
+### Notable issues
+- [Flutter 3.0 Web] Image.toByteData fails with error: Uncaught (in promise) Error: Failed to encode the image into bytes [#104197](https://github.com/flutter/flutter/issues/104197)
+- [Flutter 3]TextPainter does not respect the height factor of text style [#104153](https://github.com/flutter/flutter/issues/104153)
+- [Flutter 3] Arabic text renders incorrectly in TextSpan [#104092](https://github.com/flutter/flutter/issues/104092)
+- Spellcheck on Flutter Web [#40682](https://github.com/flutter/flutter/issues/40682)
+  - This is an old issue, but it has been getting some attention recently
+- Dart 2.17's enums are causing issues on the web when the `name` variable is added as a property. 
+  - Dart-lang issue [#49021](https://github.com/dart-lang/sdk/issues/49021)
+  - Reports in flutter [#104189](https://github.com/flutter/flutter/issues/104189),[#103874](https://github.com/flutter/flutter/issues/103874)
+
+
+### Issue counts
+
+#### Flutter
+
+New Flutter issues triaged 236, closed 98 (41.53%).
+
+In total closed 165 issues during the week.
+
+| Reason for closing  |  |
+| -- | -- |
+| Duplicate  | 30.9% |
+| Fixed | 21.8% |
+| Invalid | 33.9% |
+| Solved | 13.3% |
+
+#### Flutter/website
+
+New Flutter website issues triaged 9, closed 1 (11.11%).
+
+In total, closed 2 issues during the week.
+
+| Reason for closing| |
+| -- | -- |
+| fixed | 50% |
+| invalid | 50% |
+
+#### dart-lang/site-www
+
+New Dart site issues triaged 1, closed 0 (0%).
+
+#### Googleads-mobile-flutter
+
+New Google Ads Flutter issues triaged 2, closed 0 (0%).
+
+In total closed 1 issue during the week.
+
+| Reason for closing  |  |
+| -- | -- |
+| fixed | 100% |
+
+#### Flutterfire
+
+New Flutterfire issues triaged 19, closed 9 (47.37%).
+
+In total closed 17 issues during the week.
+
+| Reason for closing  |  |
+| -- | -- |
+| duplicate | 35.3% |
+| fixed | 17.6% |
+| invalid | 23.5%|
+| no response | 11.8% |
+| user issue| 11.8% | 
+
 ## 2022-05-13
 
 ### Notable issues

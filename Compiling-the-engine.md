@@ -295,7 +295,7 @@ gclient sync
 $ENGINE_DIR/flutter/tools/gn --fuchsia --no-lto
 ```
 
-  * `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted
+  * WARNING: see note `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted  Note that tests and production components downstream don't use this flag.  It might be broken.  Use at your own risk.
   * Add `--fuchsia-cpu=x64` or `--fuchsia-cpu=arm64` to target a particular architecture.  The default is x64.
   * Add `--runtime-mode=debug` or `--runtime-mode=profile` to switch between JIT and AOT builds.  These correspond to a vanilla Fuchsia build and a `--release` Fuchsia build respectively.  The default is debug/JIT builds.
   * For Googlers, add the `--goma` argument when using goma, and add the `--xcode-symlinks` argument when using goma on macOS.

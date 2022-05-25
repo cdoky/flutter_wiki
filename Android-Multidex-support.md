@@ -8,6 +8,8 @@ In Flutter applications, it is easy to exceed the single dex limit primarily thr
 
 Flutter supports automatic multidex error detection and support for apps targeting API 20 and below. When apps fail to build due to the multidex error, Flutter will automatically prompt the user if multidex support should be enabled. Answering yes will add support and subsequent builds in the future will build with multidex support enabled.
 
+You may pass the `--no-multidex` flag to temporarily disable multidex support during a build.
+
 # API 21+
 
 Apps that target API 21+ devices already have multidex natively supported. However, we do not recommend targeting API 21+ purely to resolve the multidex issue as this may inadvertently exclude potential users running older devices.

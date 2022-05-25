@@ -75,6 +75,7 @@ Flutter Wiki
 ### Android
 
 - [Upgrading Android API](https://github.com/flutter/flutter/wiki/Upgrading-Engine's-Android-API-version)
+- [Multidex](https://github.com/flutter/flutter/wiki/Android-Multidex-support)
 
 ### Fuchsia
 
